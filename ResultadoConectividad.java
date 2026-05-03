@@ -1,3 +1,7 @@
+/**
+ *
+ * @author Daniel Vera
+ */
 public class ResultadoConectividad {
    
     private String idFuente;
@@ -39,6 +43,5 @@ public class ResultadoConectividad {
     public void setFuertementeConexa(boolean fuertementeConexa) {
         this.fuertementeConexa = fuertementeConexa;
     }
-    
     
 }

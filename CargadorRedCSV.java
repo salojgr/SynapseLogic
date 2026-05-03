@@ -1,8 +1,11 @@
+/**
+ *
+ * @author Daniel Vera
+ */
 //Importación de librerías para la apertura, lectura y manejo de errores de archivos
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-
 
 public class CargadorRedCSV {
    
@@ -68,7 +71,6 @@ public class CargadorRedCSV {
                     
                     //Agregamos la sinapsis al grafo
                     grafo.agregarSinapsis(origen, destino, distancia, neurotransmisor, k);
-
 
                 } catch(NumberFormatException e){
                     //Error si k no es un número

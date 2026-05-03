@@ -1,3 +1,7 @@
+/**
+ *
+ * @author Daniel Vera
+ */
 //Importación de librerías para la apertura, lectura y manejo de errores de archivos
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -27,7 +31,8 @@ public class CargadorNeurotransmisoresCSV {
                     String[] partes = linea.split(",", 5);
 
                     if (partes.length < 5){
-                    System.out.printf("Error (línea %s): La línea está incompleta (faltan columnas).%n", linea);                        continue;
+                    System.out.printf("Error (línea %s): La línea está incompleta (faltan columnas).%n", linea);                        
+                    continue;
                     }
                     
                     //Asigna los datos separados a nuevas variables
@@ -64,13 +69,12 @@ public class CargadorNeurotransmisoresCSV {
                     
 
                 } catch(NumberFormatException e){
-                    
+                    //Error si k no es un número
                     System.out.printf("Error (línea %s): Formato numérico incorrecto.%n", linea);
                 } catch (Exception e){
                     //Errores no identificados
                     System.out.printf("Error (línea %s): Error inesperado. Info: %s%n", linea, e.getMessage());
                 }
-            
             
             }
         
@@ -78,13 +82,12 @@ public class CargadorNeurotransmisoresCSV {
             br.close();
             
         } catch (IOException e){
-                
+                //Error de apertura del CSV
                 System.out.printf("Error: No se pudo leer el archivo. Detalles: %s%n", e.getMessage());
         }
     
             return diccionario;
         
-       
     }
     
 }

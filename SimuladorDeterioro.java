@@ -4,9 +4,15 @@
  */
 package synapselogic;
 
+/**
+ * Clase encargada de implementar métodos relacionados al deterioro cognitivo por fatiga o
+ * traumatismo.
+ * @author Luis Velásquez
+ */
 public class SimuladorDeterioro {
     private GrafoDirigidoListaAdyacencia grafo;
     
+    //Constructor de la clase
     public SimuladorDeterioro(GrafoDirigidoListaAdyacencia grafo){
         this.grafo = grafo;
     }

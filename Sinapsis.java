@@ -2,10 +2,11 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package sinapsis;
-import neurona.Neurona;
+package synapselogic;
+
 /**
  * Creación de la clase "arista" entre las neuronas (nodos) junto con sus atributos.
+ * @author Luis Velásquez
  */
 public class Sinapsis {
     private final Neurona origen;
@@ -16,12 +17,12 @@ public class Sinapsis {
     private boolean activa;
     
     //Constructor de la clase Sinapsis
-    public Sinapsis(Neurona origen, Neurona destino, double distancia, String neurotransmisor){
+    public Sinapsis(Neurona origen, Neurona destino, double distancia, String neurotransmisor,double k){
         this.origen = origen;
         this.destino = destino;
         this.distancia = distancia;
         this.neurotransmisor = neurotransmisor;
-        this.k = 1.0;
+        this.k = k;
         this.activa = true;
     }
     
@@ -36,8 +37,16 @@ public class Sinapsis {
     }
     
     
-    public void fatiga(){ //Aplicación de la fatiga para generar deterioro cognitivo (multiplicación de k por 1.2).
-        this.k *= 1.2;
+    public void fatiga(){ //Aplicación de la fatiga para generar deterioro cognitivo (multiplicación de k por 0.8).
+        this.k *= 0.8;
+    // Si la eficiencia cae demasiado, la conexión queda funcionalmente inactiva. Por ahora 0.10
+    if (this.k < 0.10) {
+        this.activa = false;
+    }
+    //Condicional que evita que k caiga a 0
+        if (this.k < 0.01) {
+            this.k = 0.01;
+        }
     }
     
     // Getters y Setters
@@ -65,6 +74,9 @@ public class Sinapsis {
         this.activa = activa;
     }
     
+    public double getDistancia() {
+    return distancia;
+    }
     @Override
     public String toString(){
         return "Sinapsis [" + neurotransmisor + "]: " + origen.getID()+ " -> " + 

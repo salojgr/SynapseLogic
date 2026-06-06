@@ -2,10 +2,11 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package neurotransmisor;
+package synapselogic;
 
 /**
  * Creación de clase Neurotransmisor con sus respectivos atributos.
+ * @author Luis Velásquez
  */
 public class Neurotransmisor {
     private final String id;
@@ -44,7 +45,7 @@ public class Neurotransmisor {
         return efecto;
     }
     
-    //Representacuión textual de los atributos
+    //Representación textual de los atributos
     @Override
     public String toString(){
         return "Neurotransmisor {" +

@@ -9,20 +9,20 @@ package synapselogic;
  * Cola implementada mediante una lista enlazada.
  * 
  * @param <T> tipo de dato almacenado en la cola.
- * @author Salomon Gonzalez
+ * @author Salomón González
  */
 public class Cola<T> {
     
     ListaEnlazada<T> elementos;
     /**
-     * Crea una cola vacia.
+     * Crea una cola vacía.
      */
     public Cola(){
         this.elementos = new ListaEnlazada<>();
     }
     /**
      * 
-     * Verifica si la cola esta vacia.
+     * Verifica si la cola esta vacía.
      * 
      * @return true si la cola no contiene elementos. 
      */
@@ -70,7 +70,11 @@ public class Cola<T> {
      */     
      
      public T frente(){
+         if(!this.estaVacia()){
          return elementos.primero().getDato();
+         }else{
+             return null;
+         }
      }
 
     /**

@@ -1,0 +1,475 @@
+@startuml
+' --- COMANDO MAGICO PARA EVITAR EL RECORTE DEL SERVIDOR ---
+scale 0.65 
+
+skinparam classAttributeIconSize 0
+skinparam monochrome true
+skinparam shadowing false
+skinparam nodesep 20
+skinparam ranksep 40
+skinparam linetype ortho
+top to bottom direction
+
+' ... (resto de tu código exacto) ...
+
+' =========================================
+' PAQUETE 1: FRONTERA E INTERFAZ (UI)
+' =========================================
+package "1. Frontera e Interfaz (UI)" {
+    class SynapseLogic {
+        + {static} main(args: String[])
+    }
+
+    class MainFrame {
+        - controlador: SynapseLogicController
+        + MainFrame()
+        + MainFrame(controlador: SynapseLogicController)
+    }
+
+    together {
+        class PanelControl {
+            - controlador: SynapseLogicController
+            - panelResultados: PanelResultados
+            - visualizadorGrafo: VisualizadorGrafoGraphStream
+            + PanelControl()
+            + PanelControl(controlador: SynapseLogicController)
+            + setControlador(controlador: SynapseLogicController)
+            + setPanelResultados(panelResultados: PanelResultados)
+            + setVisualizadorGrafo(visualizadorGrafo: VisualizadorGrafoGraphStream)
+            - btnCargarRedActionPerformed(evt: ActionEvent)
+            - btnCargarNeuroActionPerformed(evt: ActionEvent)
+            - btnBFSActionPerformed(evt: ActionEvent)
+            - btnDFSActionPerformed(evt: ActionEvent)
+            - btnDijkstraActionPerformed(evt: ActionEvent)
+            - btnFatigaActionPerformed(evt: ActionEvent)
+            - btnTraumatismoActionPerformed(evt: ActionEvent)
+        }
+
+        class PanelEdicionYGuardado {
+            - controlador: SynapseLogicController
+            - panelResultados: PanelResultados
+            - visualizadorGrafo: VisualizadorGrafoGraphStream
+            + PanelEdicionYGuardado()
+            + setControlador(controlador: SynapseLogicController)
+            + setPanelResultados(panelResultados: PanelResultados)
+            + setVisualizadorGrafo(visualizadorGrafo: VisualizadorGrafoGraphStream)
+            - agregarNeuronaActionPerformed(evt: ActionEvent)
+            - agregarSinapsisActionPerformed(evt: ActionEvent)
+            - eliminarSinapsisActionPerformed(evt: ActionEvent)
+            - guardarRedActionPerformed(evt: ActionEvent)
+            - btnSalirActionPerformed(evt: ActionEvent)
+            - controladorDisponible(): boolean
+            - actualizarDespuesDeCambio(mensaje: String)
+            - mostrarAdvertencia(mensaje: String)
+            - mostrarError(mensaje: String)
+            - convertirDouble(texto: String, campo: String): double
+        }
+    }
+
+    together {
+        class PanelResultados {
+            + registrarOperacionSistema(accion: String)
+            + mostrarErrorValidacion(mensajeError: String)
+            + mostrarResultadosConectividad(algoritmo: String, resultado: ResultadoConectividad)
+            + mostrarReporteCarga(titulo: String, reporte: String)
+            + mostrarRuta(ruta: Ruta)
+            - hacerScrollAlFinal()
+        }
+
+        class VisualizadorGrafoGraphStream {
+            - grafoGS: Graph
+            - visor: Viewer
+            - vista: View
+            - hojaEstilos: String
+            + VisualizadorGrafoGraphStream()
+            - inicializarVisor()
+            + actualizarGrafo(grafoBackend: GrafoDirigidoListaAdyacencia)
+            + resaltarZonasAisladas(resultado: ResultadoConectividad)
+            + resaltarRuta(secuenciaIds: ListaEnlazada<String>)
+        }
+    }
+}
+
+' =========================================
+' PAQUETE 2: CONTROL Y LÓGICA DE NEGOCIO
+' =========================================
+package "2. Control y Lógica de Negocio" {
+    class SynapseLogicController {
+        - ultimoReporteCargaRed: String
+        - ultimoReporteCargaNeurotransmisores: String
+        + SynapseLogicController()
+        + cargarRed(archivo: File): String
+        + getUltimoReporteCargaRed(): String
+        + cargarDiccionario(archivo: File): String
+        + getUltimoReporteCargaNeurotransmisores(): String
+        + analizarBFS(idFuente: String): ResultadoConectividad
+        + analizarDFS(idFuente: String): ResultadoConectividad
+        + calcularRuta(origen: String, destino: String): Ruta
+        + simularDeterioro(): String
+        + simularTraumatismo(idNeurona: String): String
+        + eliminarNeurona(id: String): String
+        + agregarNeurona(id: String): String
+        + agregarSinapsis(origen: String, destino: String, distancia: double, idNeurotransmisor: String, k: double): String
+        + eliminarSinapsis(origen: String, destino: String): String
+        + guardarRed(archivo: File): String
+        + hayCambiosSinGuardar(): boolean
+        - asegurarExtensionCSV(archivo: File): File
+        + resumenRed(): String
+        + marcarComoGuardado()
+        + requiereConfirmacionParaNuevaRed(): boolean
+        + getEstado(): EstadoRed
+        + getGrafo(): GrafoDirigidoListaAdyacencia
+        + getDiccionario(): TablaHash<String, Neurotransmisor>
+        - validarRedCargada()
+        - validarDiccionarioCargado()
+        - validarArchivo(archivo: File, tipoArchivo: String)
+        - normalizarId(id: String, nombreCampo: String): String
+        + calcularVelocidadPromedio(): double
+    }
+
+    class EstadoRed {
+        - redCargada: boolean
+        - diccionarioCargado: boolean
+        - cambiosSinGuardar: boolean
+        + EstadoRed()
+        + estaRedCargada(): boolean
+        + setRedCargada(redCargada: boolean)
+        + estaDiccionarioCargado(): boolean
+        + setDiccionarioCargado(diccionarioCargado: boolean)
+        + CambiosSinGuardar(): boolean
+        + setCambiosSinGuardar(cambiosSinGuardar: boolean)
+    }
+}
+
+' =========================================
+' PAQUETE 3: SERVICIOS Y PERSISTENCIA
+' =========================================
+package "3. Servicios y Persistencia" {
+    class CargadorRedCSV {
+        - reporteCarga: StringBuilder
+        - lineasValidas: int
+        - neuronasValidas: int
+        - lineasConError: int
+        + cargar(rutaArchivo: String): GrafoDirigidoListaAdyacencia
+        + getReporteCarga(): String
+        + tieneErrores(): boolean
+        - limpiarReporte()
+        - registrarError(numeroLinea: int, linea: String, mensaje: String)
+        - registrarErrorGeneral(mensaje: String)
+        - agregarResumen()
+    }
+
+    class CargadorNeurotransmisoresCSV {
+        - reporteCarga: StringBuilder
+        - lineasValidas: int
+        - lineasConError: int
+        + cargar(rutaArchivo: String): TablaHash<String, Neurotransmisor>
+        + getReporteCarga(): String
+        + tieneErrores(): boolean
+        - limpiarReporte()
+        - registrarError(numeroLinea: int, linea: String, mensaje: String)
+        - registrarErrorGeneral(mensaje: String)
+        - agregarResumen()
+    }
+
+    class GuardadorCSV {
+        + guardarRed(rutaArchivo: String, grafo: GrafoDirigidoListaAdyacencia): String
+        + guardarNeurotransmisores(rutaArchivo: String, diccionario: TablaHash, grafo: GrafoDirigidoListaAdyacencia): String
+    }
+
+    class ValidadorDatos {
+        + {static} validarId(id: String): boolean
+        + {static} validarDistancia(distancia: double): boolean
+        + {static} validarVelocidad(velocidad: double): boolean
+        + {static} validarCoeficienteK(k: double): boolean
+        + {static} verificarRegistroRed(origen: String, destino: String, distancia: double, neurotransmisor: String, k: double): String
+        + {static} verificarRegistroNeurotransmisor(id: String, nombre: String, velocidad: double, efecto: String): String
+    }
+}
+
+' =========================================
+' PAQUETE 4: MOTORES Y ALGORITMOS
+' =========================================
+package "4. Motores y Algoritmos" {
+    class AnalizadorConectividad {
+        + analizarBFS(grafo: GrafoDirigidoListaAdyacencia, idFuente: String): ResultadoConectividad
+        + analizarDFS(grafo: GrafoDirigidoListaAdyacencia, idFuente: String): ResultadoConectividad
+        - recorridoBFS(...): TablaHash<String, Boolean>
+        - recorridoDFS(...): TablaHash<String, Boolean>
+        + esFuertementeConexa(...): boolean
+    }
+
+    class CalculadorRutaDijkstra {
+        + calcularRuta(grafo: GrafoDirigidoListaAdyacencia, diccionario: TablaHash, origen: String, destino: String): Ruta
+        - inicializarDistancias(...)
+        - reconstruirRuta(...): ListaEnlazada<String>
+    }
+
+    class SimuladorDeterioro {
+        + SimuladorDeterioro(grafo: GrafoDirigidoListaAdyacencia)
+        + ejecutarCicloFatiga()
+        + simularTraumatismo(idNeurona: String)
+    }
+}
+
+' =========================================
+' PAQUETE 5: ENTIDADES DE DOMINIO Y DTOs
+' =========================================
+package "5. Entidades de Dominio y DTOs" {
+    class Sinapsis {
+        - distancia: double
+        - neurotransmisor: String
+        - k: double
+        - activa: boolean
+        + Sinapsis(origen: Neurona, destino: Neurona, distancia: double, neurotransmisor: String, k: double)
+        + calcularW(v: double): double
+        + fatiga()
+    }
+    
+    class Neurona {
+        - id: String
+        - activa: boolean
+        + Neurona(id: String)
+        + getID(): String
+        + isActiva(): boolean
+        + setActiva(activa: boolean)
+    }
+
+    class Neurotransmisor {
+        - id: String
+        - nombre: String
+        - velocidad: double
+        - efecto: String
+        - descripcion: String
+        + Neurotransmisor(id: String, nombre: String, velocidad: double, efecto: String, descripcion: String)
+        + getId(): String
+        + getVelocidad(): double
+        + getEfecto(): String
+    }
+
+    class ResultadoConectividad {
+        - idFuente: String
+        - algoritmo: String
+        - fuertementeConexa: boolean
+        + agregarAlcanzable(id: String)
+        + agregarInalcanzable(id: String)
+        + cantidadAlcanzables(): int
+        + cantidadInalcanzables(): int
+        + getSecuenciaVisita(): ListaEnlazada<String>
+        + setSecuenciaVisita(secuenciaVisita: ListaEnlazada<String>)
+    }
+
+    class Ruta {
+        - existeRuta: boolean
+        - costoTotal: double
+        - mensaje: String
+        + {static} sinRuta(mensaje: String): Ruta
+        + {static} conRuta(secuenciaNeuronas: ListaEnlazada<String>, costoTotal: double): Ruta
+        + existeRuta(): boolean
+        + getCostoTotal(): double
+        + getMensaje(): String
+    }
+}
+
+' =========================================
+' PAQUETE 6: ESTRUCTURAS DE DATOS PROPIAS (TDA)
+' =========================================
+package "6. Estructuras de Datos Propias (TDA)" {
+    class GrafoDirigidoListaAdyacencia {
+        - contadorNeuronas: int
+        - contadorSinapsis: int
+        + GrafoDirigidoListaAdyacencia()
+        + agregarNeurona(n: Neurona)
+        + eliminarNeurona(id: String): boolean
+        + agregarSinapsis(idOrigen: String, idDestino: String, distancia: double, neurotransmisor: String, k: double): boolean
+        + eliminarSinapsis(idOrigen: String, idDestino: String): boolean
+        + obtenerAdyacentes(id: String): ListaEnlazada<Sinapsis>
+        + obtenerSinapsisDe(id: String): ListaEnlazada<Sinapsis>
+        + getListaIds(): ListaEnlazada<String>
+        + getContadorSinapsis(): int
+        + obtenerNeurona(id: String): Neurona
+        + getContadorNeuronas(): int
+        + existeNeurona(id: String): boolean
+        + existeSinapsis(origen: String, destino: String): boolean
+    }
+
+    class TablaHash<K,V> {
+        - capacidad: int
+        - tamano: int
+        - {static} FACTOR_CARGA_MAX: double
+        + TablaHash(capacidadInicial: int)
+        + TablaHash()
+        - obtenerIndice(clave: K): int
+        + estaVacia(): boolean
+        + tamano(): int
+        + insertar(clave: K, valor: V): boolean
+        + buscar(clave: K): V
+        + contieneClave(clave: K): boolean
+        + eliminar(clave: K): boolean
+        + limpiar()
+        - redimensionar()
+    }
+
+    class EntradaHash<K,V> {
+        - clave: K
+        - valor: V
+        + EntradaHash(clave: K, valor: V)
+        + getClave(): K
+        + getValor(): V
+        + setValor(valor: V)
+        + mismaClave(claveBuscada: K): boolean
+    }
+
+    class ListaEnlazada<T> {
+        - tamano: int
+        + ListaEnlazada()
+        + estaVacia(): boolean
+        + insertarInicio(dato: T): boolean
+        + insertarFinal(dato: T): boolean
+        + eliminarInicio(): T
+        + eliminar(valor: T): boolean
+        + obtener(indice: int): T
+        + limpiar()
+        + primero(): NodoLista<T>
+        + ultimo(): NodoLista<T>
+    }
+
+    class NodoLista<T> {
+        - dato: T
+        + NodoLista(dato: T)
+        + getDato(): T
+        + setDato(dato: T)
+        + getSiguiente(): NodoLista<T>
+        + setSiguiente(siguiente: NodoLista<T>)
+    }
+
+    class Pila<T> {
+        + Pila()
+        + estaVacia(): boolean
+        + tamano(): int
+        + apilar(dato: T): boolean
+        + desapilar(): T
+    }
+
+    class Cola<T> {
+        + Cola()
+        + estaVacia(): boolean
+        + tamano(): int
+        + encolar(valor: T): boolean
+        + desencolar(): T
+        + frente(): T
+    }
+
+    class MinHeap<T> {
+        - capacidad: int
+        - tamano: int
+        + MinHeap(capacidadInicial: int)
+        + esVacio(): boolean
+        + insertar(nuevoElemento: ElementoHeap<T>)
+        + extraerMinimo(): ElementoHeap<T>
+        - flotar(i: int)
+        - hundir(i: int)
+        - padre(i: int): int
+        - hijoIzquierdo(i: int): int
+        - hijoDerecho(i: int): int
+        - intercambiar(i: int, j: int)
+    }
+
+    class ElementoHeap<T> {
+        - prioridad: double
+        + ElementoHeap(elemento: T, prioridad: double)
+        + getElemento(): T
+        + getPrioridad(): double
+        + compararElementos(otro: ElementoHeap<T>): int
+    }
+}
+
+' =========================================
+' VECTORES DE MAQUETADO (Forzan la Torre Vertical)
+' =========================================
+MainFrame -[hidden]down-> SynapseLogicController
+SynapseLogicController -[hidden]down-> CargadorRedCSV
+GuardadorCSV -[hidden]down-> AnalizadorConectividad
+AnalizadorConectividad -[hidden]down-> Sinapsis
+Sinapsis -[hidden]down-> GrafoDirigidoListaAdyacencia
+
+' =========================================
+' RELACIONES Y DEPENDENCIAS GLOBALES
+' =========================================
+
+' UI -> Control
+SynapseLogic ..> MainFrame : Inicializa
+MainFrame *-- PanelControl
+MainFrame *-- PanelEdicionYGuardado
+MainFrame *-- PanelResultados
+MainFrame *-- VisualizadorGrafoGraphStream
+MainFrame *-- SynapseLogicController
+
+PanelControl --> SynapseLogicController : Delega
+PanelControl --> PanelResultados : Actualiza
+PanelControl --> VisualizadorGrafoGraphStream : Modifica vista
+
+PanelEdicionYGuardado --> SynapseLogicController : Delega
+PanelEdicionYGuardado --> PanelResultados : Actualiza
+PanelEdicionYGuardado --> VisualizadorGrafoGraphStream : Modifica vista
+
+' Control -> Dependencias
+SynapseLogicController *-- EstadoRed : Gestiona
+SynapseLogicController *-- GrafoDirigidoListaAdyacencia : "grafo"
+SynapseLogicController *-- TablaHash : "diccionario"
+SynapseLogicController ..> AnalizadorConectividad
+SynapseLogicController ..> CalculadorRutaDijkstra
+SynapseLogicController ..> SimuladorDeterioro
+SynapseLogicController ..> CargadorRedCSV
+SynapseLogicController ..> CargadorNeurotransmisoresCSV
+SynapseLogicController ..> GuardadorCSV : Usa
+
+' Servicios -> Dependencias
+CargadorRedCSV ..> GrafoDirigidoListaAdyacencia : Construye
+CargadorNeurotransmisoresCSV ..> TablaHash : Construye
+GuardadorCSV ..> GrafoDirigidoListaAdyacencia
+GuardadorCSV ..> TablaHash
+CargadorRedCSV ..> ValidadorDatos : Usa
+CargadorNeurotransmisoresCSV ..> ValidadorDatos : Usa
+CargadorNeurotransmisoresCSV ..> Neurotransmisor : Instancia
+GuardadorCSV ..> Neurotransmisor : Lee
+
+' Algoritmos -> Dependencias
+AnalizadorConectividad ..> GrafoDirigidoListaAdyacencia
+AnalizadorConectividad ..> Pila
+AnalizadorConectividad ..> Cola
+AnalizadorConectividad ..> ResultadoConectividad : Produce
+
+CalculadorRutaDijkstra ..> GrafoDirigidoListaAdyacencia
+CalculadorRutaDijkstra ..> TablaHash
+CalculadorRutaDijkstra ..> MinHeap
+CalculadorRutaDijkstra ..> Ruta : Produce
+
+SimuladorDeterioro ..> GrafoDirigidoListaAdyacencia
+SimuladorDeterioro ..> Sinapsis : fatiga()
+SimuladorDeterioro ..> Neurona : Elimina
+
+' Entidades -> TDA (Interno de Dominio)
+Sinapsis --> "1" Neurona : origen
+Sinapsis --> "1" Neurona : destino
+ResultadoConectividad *-- ListaEnlazada
+Ruta *-- ListaEnlazada
+
+' TDA -> TDA (Estructuras profundas)
+GrafoDirigidoListaAdyacencia *-- TablaHash : "neuronas, adyacencias"
+GrafoDirigidoListaAdyacencia *-- ListaEnlazada : "listaIds"
+GrafoDirigidoListaAdyacencia ..> Neurona
+GrafoDirigidoListaAdyacencia ..> Sinapsis
+
+TablaHash *-- ListaEnlazada : "tabla (cubetas)"
+TablaHash ..> EntradaHash
+
+Pila *-- ListaEnlazada : "elementos"
+Cola *-- ListaEnlazada : "elementos"
+
+ListaEnlazada *-- NodoLista : "pfirst, plast"
+NodoLista --> NodoLista : "siguiente"
+
+MinHeap *-- ElementoHeap : "arreglo"
+
+@enduml
